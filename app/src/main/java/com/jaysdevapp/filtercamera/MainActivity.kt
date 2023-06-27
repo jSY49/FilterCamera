@@ -6,33 +6,24 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Recorder
 import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.jaysdevapp.filtercamera.databinding.ActivityMainBinding
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import android.widget.Toast
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.core.Preview
-import androidx.camera.core.CameraSelector
-import android.util.Log
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
-import androidx.camera.video.FallbackStrategy
-import androidx.camera.video.MediaStoreOutputOptions
-import androidx.camera.video.Quality
-import androidx.camera.video.QualitySelector
-import androidx.camera.video.VideoRecordEvent
-import androidx.core.content.PermissionChecker
-import com.jaysdevapp.filtercamera.databinding.ActivityMainBinding
-import java.nio.ByteBuffer
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 typealias LumaListener = (luma: Double) -> Unit
 
@@ -46,14 +37,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var cameraExecutor: ExecutorService
 
+    private var mCameraFacing = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
+
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera()
+            startCamera(mCameraFacing)
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
@@ -62,10 +56,19 @@ class MainActivity : AppCompatActivity() {
         // Set up the listeners for take photo and video capture buttons
         viewBinding.cameraButton.setOnClickListener { takePhoto() }
 //        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
-
+        viewBinding.turnButton.setOnClickListener{ turnCamera() }
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
+    private fun turnCamera(){
+        if(mCameraFacing==0){
+            mCameraFacing=1
+            startCamera(mCameraFacing)
+        }else{
+            mCameraFacing=0
+            startCamera(mCameraFacing)
+        }
+    }
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
@@ -110,7 +113,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun captureVideo() {}
 
-    private fun startCamera() {
+    private fun startCamera(mCameraFacing: Int) {
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
@@ -128,7 +132,11 @@ class MainActivity : AppCompatActivity() {
             imageCapture = ImageCapture.Builder().build()
 
             // Select back camera as a default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            lateinit var cameraSelector :CameraSelector
+            when(mCameraFacing){
+                0 -> cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                1-> cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            }
 
             try {
                 // Unbind use cases before rebinding
@@ -176,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startCamera()
+                startCamera(mCameraFacing)
             } else {
                 Toast.makeText(this,
                     "Permissions not granted by the user.",
