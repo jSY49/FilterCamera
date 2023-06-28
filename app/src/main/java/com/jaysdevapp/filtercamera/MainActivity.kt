@@ -7,6 +7,10 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
+import android.view.animation.Animation
+import android.view.animation.Animation.AnimationListener
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -20,6 +24,8 @@ import androidx.camera.video.VideoCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jaysdevapp.filtercamera.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
@@ -28,7 +34,7 @@ import java.util.concurrent.Executors
 typealias LumaListener = (luma: Double) -> Unit
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var viewBinding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     private var imageCapture: ImageCapture? = null
 
@@ -38,12 +44,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
 
     private var mCameraFacing = 0
+    private lateinit var cameraAnimationListener : AnimationListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(viewBinding.root)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        setCameraAnimationListener()
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -54,9 +62,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Set up the listeners for take photo and video capture buttons
-        viewBinding.cameraButton.setOnClickListener { takePhoto() }
-//        viewBinding.videoCaptureButton.setOnClickListener { captureVideo() }
-        viewBinding.turnButton.setOnClickListener{ turnCamera() }
+        binding.cameraButton.setOnClickListener { takePhoto() }
+//        binding.videoCaptureButton.setOnClickListener { captureVideo() }
+        binding.turnButton.setOnClickListener{ turnCamera() }
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
@@ -104,7 +112,14 @@ class MainActivity : AppCompatActivity() {
                 override fun
                         onImageSaved(output: ImageCapture.OutputFileResults){
                     val msg = "Photo capture succeeded: ${output.savedUri}"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+
+                    val animation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.camera_shutter)
+                    animation.setAnimationListener(cameraAnimationListener)
+                    binding.frameLayout.animation = animation
+                    binding.frameLayout.visibility=View.VISIBLE
+                    binding.frameLayout.startAnimation(animation)
+
+//                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
                 }
             }
@@ -125,14 +140,14 @@ class MainActivity : AppCompatActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewBinding.viewFinder.surfaceProvider)
+                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
                 }
 
 
             imageCapture = ImageCapture.Builder().build()
 
             // Select back camera as a default
-            lateinit var cameraSelector :CameraSelector
+            var cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
             when(mCameraFacing){
                 0 -> cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
                 1-> cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
@@ -193,4 +208,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
+    private fun setCameraAnimationListener() {
+        cameraAnimationListener = object : AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {
+//                binding.frameLayout.visibility=View.VISIBLE
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                binding.frameLayout.visibility=View.GONE
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {
+
+            }
+
+        }
+    }
+
 }
