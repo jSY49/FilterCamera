@@ -11,38 +11,27 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.AnimationUtils
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.Recorder
-import androidx.camera.video.Recording
-import androidx.camera.video.VideoCapture
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jaysdevapp.filtercamera.databinding.ActivityMainBinding
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-typealias LumaListener = (luma: Double) -> Unit
-
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
-
     private var imageCapture: ImageCapture? = null
-
     private lateinit var cameraExecutor: ExecutorService
-
     private var mCameraFacing = 0
     private lateinit var cameraAnimationListener : AnimationListener
-
+    private lateinit var cameraController : CameraControl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -60,11 +49,17 @@ class MainActivity : AppCompatActivity() {
 
         // Set up the listeners for take photo and video capture buttons
         binding.cameraButton.setOnClickListener { takePhoto() }
-//        binding.videoCaptureButton.setOnClickListener { captureVideo() }
         binding.turnButton.setOnClickListener{ turnCamera() }
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+
+
+
     }
 
+    private fun seekBarEvent(){
+
+    }
     private fun turnCamera(){
         if(mCameraFacing==0){
             mCameraFacing=1
@@ -110,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                         onImageSaved(output: ImageCapture.OutputFileResults){
                     val msg = "Photo capture succeeded: ${output.savedUri}"
 
-                    val animation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.camera_shutter)
+                    val animation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.shutter_animation)
                     animation.setAnimationListener(cameraAnimationListener)
                     binding.frameLayout.animation = animation
                     binding.frameLayout.visibility=View.VISIBLE
@@ -152,10 +147,21 @@ class MainActivity : AppCompatActivity() {
             try {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
-
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture)
+                var camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
+
+                //seekBar 리스너
+                binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+//                        cameraController.setZoomRatio(progress.toFloat())
+                        camera.cameraControl.setLinearZoom(progress / 100.toFloat())
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) { }
+                })
+
+                cameraController = camera.cameraControl
+
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)

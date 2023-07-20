@@ -27,6 +27,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/seekbar_bar"
+        android:thumb="@drawable/seekbar_thumb"
+        android:splitTrack="false"
+        android:layout_marginVertical="20dp"
+        android:layout_marginHorizontal="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/viewFinder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+        <!-- splitTrack : 시크바 thumb 아이콘 여백 없애기 -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
