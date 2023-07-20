@@ -38,9 +38,6 @@ class MainActivity : AppCompatActivity() {
 
     private var imageCapture: ImageCapture? = null
 
-    private var videoCapture: VideoCapture<Recorder>? = null
-    private var recording: Recording? = null
-
     private lateinit var cameraExecutor: ExecutorService
 
     private var mCameraFacing = 0
@@ -126,7 +123,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun captureVideo() {}
 
     private fun startCamera(mCameraFacing: Int) {
 
