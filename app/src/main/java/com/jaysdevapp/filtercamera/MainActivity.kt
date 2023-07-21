@@ -18,6 +18,7 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jaysdevapp.filtercamera.databinding.ActivityMainBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,6 +33,9 @@ class MainActivity : AppCompatActivity() {
     private var mCameraFacing = 0
     private lateinit var cameraAnimationListener : AnimationListener
     private lateinit var cameraController : CameraControl
+    private var MyFilterAdpater = FilterAdpater(arrayListOf())
+    val datas = mutableListOf<FilterList>()
+    var filterFlag = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -52,14 +56,22 @@ class MainActivity : AppCompatActivity() {
         binding.turnButton.setOnClickListener{ turnCamera() }
         cameraExecutor = Executors.newSingleThreadExecutor()
 
+        binding.filterRecycler.apply {
+            layoutManager = LinearLayoutManager(context).also {
+                it.orientation = LinearLayoutManager.HORIZONTAL
+            }
+            adapter = MyFilterAdpater
+        }
 
-
+        datas.apply {
+            add(FilterList(img = "file:///assets/Filters/jejubear.png", title = "none"))
+            add(FilterList(img = "file:///assets/Filters/hanla.png", title = "hanla"))
+        }
+        MyFilterAdpater.update(datas)
 
     }
 
-    private fun seekBarEvent(){
 
-    }
     private fun turnCamera(){
         if(mCameraFacing==0){
             mCameraFacing=1
@@ -74,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         val imageCapture = imageCapture ?: return
 
         // Create time stamped name and MediaStore entry.
-        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.KOREA)
             .format(System.currentTimeMillis())
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
@@ -227,6 +239,15 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    fun filterOnoff(view: View) {
+        if(filterFlag){
+            binding.filterRecycler.visibility=View.VISIBLE
+        }else{
+            binding.filterRecycler.visibility=View.GONE
+        }
+        filterFlag=!filterFlag
     }
 
 }

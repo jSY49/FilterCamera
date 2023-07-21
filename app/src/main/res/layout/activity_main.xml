@@ -27,6 +27,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:visibility="gone"
+        android:id="@+id/filterRecycler"
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        tools:listitem="@layout/recycler_filter_list"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
@@ -41,6 +53,8 @@
         app:layout_constraintStart_toStartOf="parent" />
         <!-- splitTrack : 시크바 thumb 아이콘 여백 없애기 -->
 
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
@@ -48,6 +62,25 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/galleryButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/twotone_image_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:text="@string/gallery"
+            app:layout_constraintEnd_toEndOf="@+id/galleryButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/galleryButton" />
 
         <ImageButton
             android:id="@+id/cameraButton"
@@ -59,6 +92,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/FilterButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/twotone_photo_library_24"
+            android:onClick="filterOnoff"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:text="@string/filter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/FilterButton"
+            app:layout_constraintTop_toBottomOf="@+id/FilterButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
